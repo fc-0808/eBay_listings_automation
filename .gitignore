@@ -1,0 +1,10 @@
+.env
+.ebay_tokens.json
+*.pyc
+__pycache__/
+.venv/
+venv/
+.idea/
+.vscode/
+*.log
+.DS_Store
