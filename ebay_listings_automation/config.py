@@ -33,7 +33,15 @@ if not OAUTH_CALLBACK_URL:
     else:
         OAUTH_CALLBACK_URL = _default_callback
 
-# Required when OAUTH_CALLBACK_URL uses https:// — PEM paths from mkcert (or your own cert).
+# Optional: where the local socket binds (scheme/host/port/path). Use with ngrok: public
+# https URL in OAUTH_CALLBACK_URL, listen URL stays http://127.0.0.1:PORT/... .
+_listen = (os.environ.get("EBAY_OAUTH_LISTEN_URL") or "").strip()
+if _listen:
+    OAUTH_LISTEN_URL = _listen
+else:
+    OAUTH_LISTEN_URL = OAUTH_CALLBACK_URL
+
+# Required when OAUTH_LISTEN_URL uses https:// — PEM paths from mkcert (or your own cert).
 OAUTH_SSL_CERTFILE = (os.environ.get("EBAY_OAUTH_SSL_CERTFILE") or "").strip()
 OAUTH_SSL_KEYFILE = (os.environ.get("EBAY_OAUTH_SSL_KEYFILE") or "").strip()
 

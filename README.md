@@ -23,7 +23,8 @@ The remote at [fc-0808/eBay_listings_automation](https://github.com/fc-0808/eBay
    - `EBAY_CLIENT_ID` / `EBAY_CLIENT_SECRET` from **Application Keys** (Sandbox first).
    - **`EBAY_RU_NAME`** — the **RuName** string eBay shows after you configure redirects (see below). This is what the OAuth `redirect_uri` parameter must be; it is **not** the `http://127.0.0.1/...` URL.
    - **`EBAY_OAUTH_CALLBACK_URL`** — must match **Auth Accepted URL** in the portal **exactly** (see [Localhost and HTTPS](#localhost-and-https-research) — use **HTTPS**).
-   - **`EBAY_OAUTH_SSL_CERTFILE`** / **`EBAY_OAUTH_SSL_KEYFILE`** — required when the callback URL is `https://…` (local PEM files, e.g. from [mkcert](https://github.com/FiloSottile/mkcert)).
+   - **`EBAY_OAUTH_LISTEN_URL`** — optional; defaults to **`EBAY_OAUTH_CALLBACK_URL`**. Set to `http://127.0.0.1:8765/oauth/callback` when **`EBAY_OAUTH_CALLBACK_URL`** is an **ngrok** `https://…` URL (see [Ngrok vs GitHub Pages](#ngrok-vs-github-pages-url)).
+   - **`EBAY_OAUTH_SSL_CERTFILE`** / **`EBAY_OAUTH_SSL_KEYFILE`** — required only when the **listen** URL is `https://` to **localhost** (e.g. mkcert). Not used for the ngrok + local HTTP pattern.
    - `EBAY_ENV=sandbox` until you use Production keys.
 
 ### Localhost and HTTPS research
@@ -41,6 +42,24 @@ So: treat **`https://127.0.0.1:<port>/…`** (with a real TLS certificate your O
 This repo’s default is **`https://127.0.0.1:8765/oauth/callback`**. `run_oauth.py` serves HTTPS when you set **`EBAY_OAUTH_SSL_CERTFILE`** and **`EBAY_OAUTH_SSL_KEYFILE`**.
 
 **mkcert (typical dev flow):** install mkcert, run `mkcert -install`, then `mkcert 127.0.0.1`, point the two env vars at the generated `127.0.0.1.pem` and `127.0.0.1-key.pem`, update the eBay portal URLs to match `EBAY_OAUTH_CALLBACK_URL`, then run `python run_oauth.py`. Your browser may show a warning if you do not use mkcert’s locally-trusted CA.
+
+### Ngrok vs GitHub Pages URL
+
+| Approach | Best for | Tradeoff |
+|----------|----------|----------|
+| **[ngrok](https://ngrok.com/)** (or **Cloudflare Tunnel**, **localtunnel**) | **This repo and `run_oauth.py`.** Tunnel gives you a public **HTTPS** URL that forwards to `127.0.0.1:8765`. eBay redirects the browser there; your local Python server still receives `?code=…` and exchanges it automatically. | Free ngrok URLs **change when you restart** the tunnel unless you use a **paid reserved domain**. When the URL changes, update **Auth accepted URL** in the eBay portal and **`EBAY_OAUTH_CALLBACK_URL`** in `.env` to match. |
+| **GitHub Pages / `github.io` repo URL** | **Stable HTTPS** for things that are **just a document** in the browser, e.g. your **privacy policy** (`raw.githubusercontent.com` or a Pages site). | **Poor fit as the OAuth callback** for this script: GitHub Pages serves **static files only**. It does **not** run `run_oauth.py`, so nothing on GitHub can complete the token exchange for you unless you build a separate flow (e.g. static page that only **shows** the `code` for manual copy-paste, then another local step). |
+
+**Recommendation (ngrok):** run `ngrok http 8765`, copy the **https** forwarding URL, then set:
+
+- **`EBAY_OAUTH_CALLBACK_URL`** = `https://YOUR-SUBDOMAIN.ngrok-free.app/oauth/callback` (same path in the eBay portal **Auth accepted / declined** fields).
+- **`EBAY_OAUTH_LISTEN_URL`** = `http://127.0.0.1:8765/oauth/callback` (where this repo’s server binds; ngrok forwards here).
+
+Leave **`EBAY_OAUTH_SSL_CERTFILE`** / **`EBAY_OAUTH_SSL_KEYFILE`** empty: TLS terminates at ngrok; the local listener stays **HTTP**.
+
+If you insist on **no tunnel**, use **mkcert + `https://127.0.0.1:…`** on both the portal and **`EBAY_OAUTH_CALLBACK_URL`**, omit **`EBAY_OAUTH_LISTEN_URL`**, and set the two SSL env vars to the PEM files.
+
+Do **not** use a GitHub Pages URL as the OAuth callback for this script unless you add your own static “show the `code`” page and a separate token step.
 
 ### Copy-paste: eBay Sign-in Settings (Sandbox RuName)
 
