@@ -91,9 +91,9 @@ def main() -> None:
             raise SystemExit(
                 "The listen URL is https but EBAY_OAUTH_SSL_CERTFILE / "
                 "EBAY_OAUTH_SSL_KEYFILE are not set.\n\n"
-                "Either use http://127.0.0.1:… for EBAY_OAUTH_LISTEN_URL with ngrok, or "
+                "Either use http://127.0.0.1:… for EBAY_OAUTH_LISTEN_URL with a tunnel, or "
                 "create local PEM files with mkcert and point the SSL env vars at them.\n"
-                "See README: “Localhost and HTTPS research” and “ngrok vs GitHub”."
+                "See README: “Localhost and HTTPS research” and “How others do local OAuth”."
             )
         ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         ctx.load_cert_chain(config.OAUTH_SSL_CERTFILE, config.OAUTH_SSL_KEYFILE)

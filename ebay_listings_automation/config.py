@@ -33,7 +33,7 @@ if not OAUTH_CALLBACK_URL:
     else:
         OAUTH_CALLBACK_URL = _default_callback
 
-# Optional: where the local socket binds (scheme/host/port/path). Use with ngrok: public
+# Optional: where the local socket binds (scheme/host/port/path). Use with a tunnel: public
 # https URL in OAUTH_CALLBACK_URL, listen URL stays http://127.0.0.1:PORT/... .
 _listen = (os.environ.get("EBAY_OAUTH_LISTEN_URL") or "").strip()
 if _listen:
