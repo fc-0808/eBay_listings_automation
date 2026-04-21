@@ -25,6 +25,24 @@ The remote at [fc-0808/eBay_listings_automation](https://github.com/fc-0808/eBay
    - **`EBAY_OAUTH_CALLBACK_URL`** — usually `http://127.0.0.1:8765/oauth/callback`. It must match **Auth Accepted URL** in the portal for that RuName **exactly**.
    - `EBAY_ENV=sandbox` until you use Production keys.
 
+### Copy-paste: eBay Sign-in Settings (Sandbox RuName)
+
+Paste into eBay’s form fields, then **Save**. (We cannot type into eBay for you; this is the exact text to use.)
+
+| eBay field | Paste this |
+|------------|------------|
+| **Display title** | `Sandbox local — Listings automation` |
+| **Your privacy policy URL** | `https://raw.githubusercontent.com/fc-0808/eBay_listings_automation/main/docs/privacy.html` |
+| **Your auth accepted URL** | `http://127.0.0.1:8765/oauth/callback` |
+| **Your auth declined URL** | `http://127.0.0.1:8765/oauth/callback` |
+| **Sign-in method** | **OAuth** (not Auth’n’auth) |
+
+That privacy URL is a minimal policy page in this repo (`docs/privacy.html`) served over **HTTPS** via GitHub’s `raw.githubusercontent.com` CDN. It only works after this file exists on your **`main`** branch (run `git push` if you have not yet).
+
+If eBay’s validator rejects `raw.githubusercontent.com`, use any **https://** page you control instead and keep the two auth URLs identical to the table above.
+
+If eBay rejects **http** for the auth URLs, say so and we can switch the project to **HTTPS localhost** for the callback.
+
 ### Where to add `http://127.0.0.1:8765/oauth/callback` (RuName setup)
 
 eBay splits this into two ideas ([official doc](https://developer.ebay.com/api-docs/static/oauth-redirect-uri.html)):
@@ -42,12 +60,7 @@ eBay splits this into two ideas ([official doc](https://developer.ebay.com/api-d
 4. Click **User Tokens** — the link **right next to your Sandbox App ID** (not only the profile menu).
 5. Open **Get a Token from eBay via Your Application** (dropdown/section).
 6. If you have no redirect yet: **You have no Redirect URLs. Click here to add one** (or **+ Add eBay Redirect URL**). Confirm legal address if asked.
-7. Fill the form, for example:
-   - **Display Title**: anything (e.g. `Local dev`).
-   - **Privacy Policy URL**: any HTTPS URL you control that hosts a short policy page (eBay requires a value for user tokens). For quick local testing, use a real page you own; placeholder domains often fail validation.
-   - **Auth Accepted URL**: `http://127.0.0.1:8765/oauth/callback`
-   - **Auth Declined URL**: same as accepted, or another page you control.
-   - Enable **OAuth** for this redirect row, then **Save**.
+7. Fill the form using the **Copy-paste** table above, then **Save**.
 8. Copy the **Sandbox RuName** value eBay displays and paste it into `.env` as **`EBAY_RU_NAME`**.
 
 4. **Run OAuth once** (starts a tiny local server and opens the consent URL):
