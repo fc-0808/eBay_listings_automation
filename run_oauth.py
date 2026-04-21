@@ -7,6 +7,7 @@ Prerequisites:
 """
 from __future__ import annotations
 
+import ssl
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -75,6 +76,23 @@ def main() -> None:
 
     event = threading.Event()
     server = HTTPServer((host, port), Handler)
+    callback = urlparse(config.OAUTH_CALLBACK_URL)
+    if callback.scheme == "https":
+        if not config.OAUTH_SSL_CERTFILE or not config.OAUTH_SSL_KEYFILE:
+            raise SystemExit(
+                "EBAY_OAUTH_CALLBACK_URL is https but EBAY_OAUTH_SSL_CERTFILE / "
+                "EBAY_OAUTH_SSL_KEYFILE are not set.\n\n"
+                "eBay’s portal requires HTTPS for Auth Accepted / Declined URLs. "
+                "Create local PEM files, for example with mkcert:\n"
+                "  mkcert -install\n"
+                "  mkcert 127.0.0.1\n"
+                "Then set the two env vars to the generated PEM paths (see .env.example).\n"
+                "See README: “Does a local callback URL work?”"
+            )
+        ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        ctx.load_cert_chain(config.OAUTH_SSL_CERTFILE, config.OAUTH_SSL_KEYFILE)
+        server.socket = ctx.wrap_socket(server.socket, server_side=True)
+
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
 
@@ -86,7 +104,8 @@ def main() -> None:
     except Exception:
         pass
 
-    print(f"Waiting for redirect on http://{host}:{port}{expected_path} ...")
+    wait_url = f"{callback.scheme}://{host}:{port}{expected_path}"
+    print(f"Waiting for redirect on {wait_url} ...")
     event.wait(timeout=600)
     server.shutdown()
     server.server_close()

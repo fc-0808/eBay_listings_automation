@@ -24,13 +24,18 @@ if not RU_NAME and _legacy_redirect and not _legacy_redirect.startswith(("http:/
     RU_NAME = _legacy_redirect
 
 # Browser redirect after consent — must match "Auth Accepted URL" for that RuName in the portal.
-_default_callback = "http://127.0.0.1:8765/oauth/callback"
+# eBay requires https for accept/decline URLs (see README); default is HTTPS localhost.
+_default_callback = "https://127.0.0.1:8765/oauth/callback"
 OAUTH_CALLBACK_URL = (os.environ.get("EBAY_OAUTH_CALLBACK_URL") or "").strip()
 if not OAUTH_CALLBACK_URL:
     if _legacy_redirect.startswith(("http://", "https://")):
         OAUTH_CALLBACK_URL = _legacy_redirect
     else:
         OAUTH_CALLBACK_URL = _default_callback
+
+# Required when OAUTH_CALLBACK_URL uses https:// — PEM paths from mkcert (or your own cert).
+OAUTH_SSL_CERTFILE = (os.environ.get("EBAY_OAUTH_SSL_CERTFILE") or "").strip()
+OAUTH_SSL_KEYFILE = (os.environ.get("EBAY_OAUTH_SSL_KEYFILE") or "").strip()
 
 _root = Path(__file__).resolve().parents[1]
 TOKEN_PATH = Path(os.environ.get("EBAY_TOKEN_PATH") or _root / ".ebay_tokens.json")
