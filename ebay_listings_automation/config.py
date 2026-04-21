@@ -41,12 +41,25 @@ if _listen:
 else:
     OAUTH_LISTEN_URL = OAUTH_CALLBACK_URL
 
-# Required when OAUTH_LISTEN_URL uses https:// — PEM paths from mkcert (or your own cert).
-OAUTH_SSL_CERTFILE = (os.environ.get("EBAY_OAUTH_SSL_CERTFILE") or "").strip()
-OAUTH_SSL_KEYFILE = (os.environ.get("EBAY_OAUTH_SSL_KEYFILE") or "").strip()
-
 _root = Path(__file__).resolve().parents[1]
+
+
+def _repo_path(p: str) -> str:
+    if not p:
+        return p
+    x = Path(p)
+    if x.is_absolute():
+        return str(x)
+    return str((_root / x).resolve())
+
+
+# Required when OAUTH_LISTEN_URL uses https:// — PEM paths from mkcert (or your own cert).
+OAUTH_SSL_CERTFILE = _repo_path((os.environ.get("EBAY_OAUTH_SSL_CERTFILE") or "").strip())
+OAUTH_SSL_KEYFILE = _repo_path((os.environ.get("EBAY_OAUTH_SSL_KEYFILE") or "").strip())
+
 TOKEN_PATH = Path(os.environ.get("EBAY_TOKEN_PATH") or _root / ".ebay_tokens.json")
+if not TOKEN_PATH.is_absolute():
+    TOKEN_PATH = (_root / TOKEN_PATH).resolve()
 
 AUTH_BASE = "https://auth.sandbox.ebay.com" if SANDBOX else "https://auth.ebay.com"
 API_BASE = "https://api.sandbox.ebay.com" if SANDBOX else "https://api.ebay.com"

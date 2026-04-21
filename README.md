@@ -27,6 +27,8 @@ The remote at [fc-0808/eBay_listings_automation](https://github.com/fc-0808/eBay
    - **`EBAY_OAUTH_SSL_CERTFILE`** / **`EBAY_OAUTH_SSL_KEYFILE`** — required for the **default** flow: **HTTPS on your own machine** (e.g. **mkcert**). Omit them only when using a tunnel that terminates TLS before your listener.
    - `EBAY_ENV=sandbox` until you use Production keys.
 
+**mkcert + verify:** In the project directory, run **`mkcert -install`** once (use **Administrator** PowerShell on Windows so the OS trusts `https://127.0.0.1`), then **`mkcert 127.0.0.1`**. Add the two PEM paths to **`EBAY_OAUTH_SSL_CERTFILE`** and **`EBAY_OAUTH_SSL_KEYFILE`** in `.env`. Run **`python verify_setup.py`** — it should print `OK` if credentials and TLS files load. The PEMs are listed in `.gitignore`.
+
 ### Localhost and HTTPS research
 
 **For the RuName “Auth accepted / declined” fields in the developer portal: effectively no — eBay expects HTTPS.**

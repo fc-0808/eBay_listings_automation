@@ -8,3 +8,7 @@ venv/
 .vscode/
 *.log
 .DS_Store
+
+# mkcert (local TLS — never commit)
+127.0.0.1.pem
+127.0.0.1-key.pem

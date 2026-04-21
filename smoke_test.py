@@ -10,7 +10,11 @@ from ebay_listings_automation.client import EbaySession
 
 def main() -> None:
     session = EbaySession()
-    r = session.request("GET", "/sell/inventory/v1/inventory_item", params={"limit": 5})
+    try:
+        r = session.request("GET", "/sell/inventory/v1/inventory_item", params={"limit": 5})
+    except RuntimeError as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(1)
     print(f"HTTP {r.status_code}")
     try:
         data = r.json()
@@ -21,7 +25,7 @@ def main() -> None:
         print(json.dumps(data, indent=2))
         sys.exit(1)
     total = data.get("total", data.get("href", ""))
-    print("OK — authenticated call succeeded.")
+    print("OK - authenticated call succeeded.")
     print(f"Response snippet: total={total!r}, keys={list(data.keys())}")
 
 
