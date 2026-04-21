@@ -22,7 +22,7 @@ def build_authorize_url(state: str, scopes: str | None = None) -> str:
     q = urllib.parse.urlencode(
         {
             "client_id": config.CLIENT_ID,
-            "redirect_uri": config.REDIRECT_URI,
+            "redirect_uri": config.RU_NAME,
             "response_type": "code",
             "scope": scope,
             "state": state,
@@ -37,7 +37,7 @@ def exchange_authorization_code(code: str) -> dict[str, Any]:
         {
             "grant_type": "authorization_code",
             "code": code,
-            "redirect_uri": config.REDIRECT_URI,
+            "redirect_uri": config.RU_NAME,
         }
     )
     r = httpx.post(

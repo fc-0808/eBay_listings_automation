@@ -2,8 +2,8 @@
 One-shot OAuth login: opens browser (or prints URL), receives redirect, saves tokens.
 
 Prerequisites:
-  - Copy .env.example to .env and set client id/secret and EBAY_REDIRECT_URI.
-  - In eBay Developer Portal, set the app's RuName (redirect) to match EBAY_REDIRECT_URI exactly.
+  - Copy .env.example to .env: client id/secret, EBAY_RU_NAME (RuName string from portal), and
+    EBAY_OAUTH_CALLBACK_URL (must match Auth Accepted URL in that RuName's config).
 """
 from __future__ import annotations
 
@@ -17,10 +17,10 @@ from ebay_listings_automation import oauth
 from ebay_listings_automation import tokens as tokens_mod
 
 
-def _parse_redirect(redirect_uri: str) -> tuple[str, int, str]:
-    u = urlparse(redirect_uri)
+def _parse_redirect(callback_url: str) -> tuple[str, int, str]:
+    u = urlparse(callback_url)
     if u.scheme not in ("http", "https"):
-        raise ValueError("EBAY_REDIRECT_URI must be http or https")
+        raise ValueError("EBAY_OAUTH_CALLBACK_URL must be http or https")
     host = u.hostname or "127.0.0.1"
     port = u.port or (443 if u.scheme == "https" else 80)
     path = u.path or "/"
@@ -31,7 +31,7 @@ def _parse_redirect(redirect_uri: str) -> tuple[str, int, str]:
 
 def main() -> None:
     config.require_oauth_credentials()
-    host, port, expected_path = _parse_redirect(config.REDIRECT_URI)
+    host, port, expected_path = _parse_redirect(config.OAUTH_CALLBACK_URL)
 
     state = oauth.new_oauth_state()
     auth_url = oauth.build_authorize_url(state)
@@ -44,7 +44,7 @@ def main() -> None:
         def do_GET(self) -> None:
             parsed = urlparse(self.path)
             if parsed.path != expected_path:
-                self.send_error(404, "Path does not match EBAY_REDIRECT_URI")
+                self.send_error(404, "Path does not match EBAY_OAUTH_CALLBACK_URL")
                 return
             qs = parse_qs(parsed.query)
             if "error" in qs:
